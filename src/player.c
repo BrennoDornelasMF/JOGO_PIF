@@ -1,11 +1,13 @@
 #include "player.h"
 #include "road.h"
+#include <math.h>
 
 Player player;
+float playerX = 0;
 
 void InitPlayer(void) {
 
-    player.x = 0;
+    playerX = 0;
     player.speed = 0;
 
     player.texture =
@@ -20,8 +22,15 @@ void UpdatePlayer(void) {
 
     if (IsKeyDown(KEY_UP)) {
 
-        player.speed += 0.25f;
+        player.speed += 0.05f;
     }
+
+    // ========================
+    //VELOCIDADE MÁXIMA
+    // ========================
+
+    if(player.speed >30)
+        player.speed=30;
 
     // =========================
     // FREIO
@@ -56,36 +65,35 @@ void UpdatePlayer(void) {
         2.0f + player.speed * 0.03f;
 
     if (IsKeyDown(KEY_LEFT))
-        player.x -= steerStrength;
+        playerX -= steerStrength;
 
     if (IsKeyDown(KEY_RIGHT))
-        player.x += steerStrength;
+        playerX += steerStrength;
+    
+    // =========================
+    // MOVIMENTO DA PISTA
+    // =========================
+    
+    
+    roadPosition += player.speed * 0.02f;
+
+    roadPosition = fmod(roadPosition, trackDataLen);
+    float curve = readTrack(roadPosition);
+    playerX += curve * player.speed * 0.005f;
+    
+    
+    
 
     // =========================
     // LIMITE DA PISTA
     // =========================
 
-    if (player.x < -400)
-        player.x = -400;
+    if (playerX < -400)
+        playerX = -400;
 
-    if (player.x > 400)
-        player.x = 400;
+    if (playerX > 400)
+        playerX = 400;
 
-    // =========================
-    // MOVIMENTO DA PISTA
-    // =========================
-
-    roadPosition += player.speed;
-
-    int segment =
-        (((int)(-roadPosition * 0.3f))
-        + ROAD_LENGTH)
-        % ROAD_LENGTH;
-
-    player.x +=
-        road[segment].curve
-        * player.speed
-        * 0.02f;
 }
 
 void DrawPlayer(void) {
@@ -110,15 +118,15 @@ void DrawPlayer(void) {
         },
 
         (Rectangle){
-            SCREEN_WIDTH / 2 + player.x,
-            SCREEN_HEIGHT - 70,
+            SCREEN_WIDTH / 2 + playerX * 0.5f,
+            SCREEN_HEIGHT - height/2+20,
             width,
             height
         },
 
         (Vector2){
             width / 2,
-            height / 2
+            height
         },
 
         0,

@@ -34,6 +34,8 @@ int main(){
         DrawRoad();
         DrawSprites();
         DrawPlayer();
+        DrawText(TextFormat("roadPos: %.1f", roadPosition), 10, 10, 20, RED);
+        
 
 
         EndDrawing();

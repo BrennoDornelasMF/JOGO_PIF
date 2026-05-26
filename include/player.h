@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "raylib.h"
+extern float playerX;
 
 typedef struct {
 

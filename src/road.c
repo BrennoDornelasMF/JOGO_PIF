@@ -1,147 +1,96 @@
 #include "road.h"
-
-Segment road[ROAD_LENGTH];
+#include <math.h>
+#include <string.h>
+extern float playerX;
 
 float roadPosition = 0;
+float trackValue[TRACK_LENGTH];
+float track[100];
+float turnValue = 0;
 
-float Lerp(float a, float b, float t) {
+static const char* trackData = "===l===r===LR===RR==R=L=L=L======RR=RLR===";
+int trackDataLen = 0;
 
-    return a + (b - a) * t;
+float lineToDistance(float line) {
+    return 10.0f / ((100.0f - line) + 1.0f);
+}
+
+float distanceToLine(float distance) {
+    return 101.0f - 10.0f / distance;
+}
+
+float readTrack(float x) {
+    int i1 = (int)floorf(x);
+    float a = x - i1;
+    int i2 = i1 + 1;
+    float v1 = trackValue[i1 % trackDataLen];
+    float v2 = trackValue[i2 % trackDataLen];
+    a = a * a * (3 - 2 * a);  // smoothstep
+    return v1 * (1 - a) + v2 * a;
 }
 
 void InitRoad(void) {
+    trackDataLen = strlen(trackData);
 
-    for (int i = 0; i < ROAD_LENGTH; i++) {
-
-        road[i].curve = 0;
-    }
-
-    // =========================
-    // CURVA DIREITA
-    // =========================
-
-    for (int i = 300; i < 700; i++) {
-
-        float t =
-            (float)(i - 300) /
-            (700 - 300);
-
-        road[i].curve =
-            Lerp(0, 0.8f, t);
-    }
-
-    // =========================
-    // CURVA ESQUERDA
-    // =========================
-
-    for (int i = 900; i < 1300; i++) {
-
-        float t =
-            (float)(i - 900) /
-            (1300 - 900);
-
-        road[i].curve =
-            Lerp(0, -0.8f, t);
-    }
-}
-
-
-void DrawRoad(void) {
-
-    int horizon = 250;
-
-    // desenha do horizonte até baixo
-    for (int y = horizon; y < SCREEN_HEIGHT; y++) {
-
-        // profundidade da scanline
-        float perspective =
-            (float)(y - horizon) /
-            (SCREEN_HEIGHT - horizon);
-
-        // segmento da pista
-        int segment =
-            (((int)(-roadPosition * 0.3f) + y)
-            + ROAD_LENGTH)
-            % ROAD_LENGTH;
-
-        // =========================
-        // CURVA DA PISTA
-        // =========================
-
-        float curve =
-            road[segment].curve;
-
-        // deslocamento da pista
-        float offset =
-            curve *
-            perspective *
-            600;
-
-        // centro da pista
-        float roadCenter =
-            SCREEN_WIDTH / 2
-            + offset;
-
-        // largura da pista
-        float roadWidth =
-            300 +
-            perspective * 700;
-
-        // =========================
-        // CORES
-        // =========================
-
-        Color grassColor;
-        Color roadColor;
-
-        if ((segment / 8) % 2 == 0) {
-
-            grassColor = DARKGREEN;
-            roadColor = DARKGRAY;
-
-        } else {
-
-            grassColor = GREEN;
-            roadColor = GRAY;
-        }
-
-        // =========================
-        // GRAMA
-        // =========================
-
-        DrawRectangle(
-            0,
-            y,
-            SCREEN_WIDTH,
-            1,
-            grassColor
-        );
-
-        // =========================
-        // PISTA
-        // =========================
-
-        DrawRectangle(
-            roadCenter - roadWidth / 2,
-            y,
-            roadWidth,
-            1,
-            roadColor
-        );
-
-        // =========================
-        // FAIXA CENTRAL
-        // =========================
-
-        if ((segment / 64) % 2 == 0) {
-
-            DrawRectangle(
-                roadCenter - 5,
-                y,
-                10,
-                1,
-                YELLOW
-            );
+    for (int i = 0; i < trackDataLen; i++) {
+        switch (trackData[i]) {
+            case 'l': trackValue[i] = -150; break;
+            case 'L': trackValue[i] = -300; break;
+            case 'r': trackValue[i] =  150; break;
+            case 'R': trackValue[i] =  300; break;
+            default:  trackValue[i] =    0; break;
         }
     }
 }
+
+    void DrawRoad(void) {
+        float off  = 0;
+        float off2 = -playerX;
+        float tt   = 0;
+
+        int horizon = SCREEN_HEIGHT / 2+35;  // linha do horizonte
+        DrawRectangle(0, horizon, SCREEN_WIDTH, SCREEN_HEIGHT - horizon, DARKGREEN);
+
+        for (int i = 5; i < 100; i++) {
+            
+            // mapeia i (0=horizonte, 100=base) para Y na tela
+            float screenY = SCREEN_HEIGHT - (float)i * (SCREEN_HEIGHT - horizon) / 100.0f;
+            
+            if (screenY < horizon) continue;
+            
+            float dist  = lineToDistance(i);
+            float d     = roadPosition + dist;
+            float width = (SCREEN_WIDTH * 0.04f) / dist;
+            
+            float t = readTrack(d);
+            tt   += t * dist * dist * 0.005f;
+            off  += tt;
+            
+            float screenX = SCREEN_WIDTH / 2.0f + off + off2 * (100 - i) / 100.0f;
+
+            // cores alternadas
+            int seg = (int)(d * 10);
+            Color grassColor = (seg % 10 < 5) ? DARKGREEN : GREEN;
+            Color roadColor  = (seg % 10 < 5) ? DARKGRAY  : GRAY;
+
+            float lineH = (SCREEN_HEIGHT - horizon) / 100.0f;
+
+            // grama
+            DrawRectangle(0, screenY, SCREEN_WIDTH, lineH + 1, grassColor);
+
+            // pista
+            DrawRectangle(screenX - width, screenY, width * 2, lineH + 1, roadColor);
+
+            // bordas
+            DrawRectangle(screenX - width,          screenY, width * 0.08f, lineH + 1, WHITE);
+            DrawRectangle(screenX + width * 0.92f,  screenY, width * 0.08f, lineH + 1, WHITE);
+
+            // faixa central
+            if (seg % 20 < 10)
+                DrawRectangle(screenX - width * 0.03f, screenY, width * 0.06f, lineH + 1, YELLOW);
+
+            track[i] = screenX;
+            if (i == 0) turnValue = t;
+        }
+        DrawRectangle(0, horizon, SCREEN_WIDTH, 3, GREEN);
+    }   
