@@ -30,8 +30,8 @@ void UpdatePlayer(void) {
     //VELOCIDADE MÁXIMA
     // ========================
 
-    if(player.speed >30)
-        player.speed=30;
+    if(player.speed >10)
+        player.speed=10;
 
     // =========================
     // FREIO
@@ -39,7 +39,7 @@ void UpdatePlayer(void) {
 
     if (IsKeyDown(KEY_DOWN)) {
 
-        player.speed -= 0.35f;
+        player.speed -= 0.05f;
     }
 
     // =========================
@@ -55,15 +55,15 @@ void UpdatePlayer(void) {
     if (player.speed < 0)
         player.speed = 0;
 
-    if (player.speed > 80)
-        player.speed = 80;
+    if (player.speed > 20)
+        player.speed = 20;
 
     // =========================
     // DIREÇÃO
     // =========================
 
     float steerStrength =
-        2.0f + player.speed * 0.03f;
+        3.5f + player.speed * 1.0f;
 
     if (IsKeyDown(KEY_LEFT))
         playerX -= steerStrength;
