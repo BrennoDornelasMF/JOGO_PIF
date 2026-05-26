@@ -1,6 +1,7 @@
 #include "player.h"
 #include "road.h"
 #include <math.h>
+extern float turnValue;
 
 Player player;
 float playerX = 0;
@@ -88,11 +89,11 @@ void UpdatePlayer(void) {
     // LIMITE DA PISTA
     // =========================
 
-    if (playerX < -400)
-        playerX = -400;
+    if (playerX < -600)
+        playerX = -600;
 
-    if (playerX > 400)
-        playerX = 400;
+    if (playerX > 600)
+        playerX = 600;
 
 }
 
@@ -107,7 +108,7 @@ void DrawPlayer(void) {
         player.texture.height * scale;
 
     DrawTexturePro(
-
+        
         player.texture,
 
         (Rectangle){
@@ -129,7 +130,7 @@ void DrawPlayer(void) {
             height
         },
 
-        0,
+        turnValue * 0.01f,
         WHITE
     );
 }

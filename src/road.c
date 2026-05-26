@@ -60,7 +60,7 @@ void InitRoad(void) {
             
             float dist  = lineToDistance(i);
             float d     = roadPosition + dist;
-            float width = (SCREEN_WIDTH * 0.04f) / dist;
+            float width = (SCREEN_WIDTH * 0.06f) / dist;
             
             float t = readTrack(d);
             tt   += t * dist * dist * 0.005f;
