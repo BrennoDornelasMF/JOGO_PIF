@@ -27,11 +27,11 @@ void UpdatePlayer(void) {
     }
 
     // ========================
-    //VELOCIDADE MÁXIMA
+    // VELOCIDADE MÁXIMA
     // ========================
 
-    if(player.speed >10)
-        player.speed=10;
+    if(player.speed > 10)
+        player.speed = 10;
 
     // =========================
     // FREIO
@@ -55,15 +55,15 @@ void UpdatePlayer(void) {
     if (player.speed < 0)
         player.speed = 0;
 
-    if (player.speed > 20)
-        player.speed = 20;
+    if (player.speed > 3)
+        player.speed = 3;
 
     // =========================
     // DIREÇÃO
     // =========================
 
     float steerStrength =
-        3.5f + player.speed * 1.0f;
+        3.5f + player.speed ;
 
     if (IsKeyDown(KEY_LEFT))
         playerX -= steerStrength;
@@ -76,7 +76,11 @@ void UpdatePlayer(void) {
     // =========================
     
     
-    roadPosition += player.speed * 0.02f;
+    roadPosition += player.speed * 0.01f;
+
+    // if(roadPosition > 10){
+    //     roadPosition = 0;
+    // }
 
     roadPosition = fmod(roadPosition, trackDataLen);
     float curve = readTrack(roadPosition);
