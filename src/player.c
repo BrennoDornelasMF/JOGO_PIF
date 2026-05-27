@@ -118,7 +118,7 @@ void UpdatePlayer(void) {
 
     float curve = readTrack(roadPosition);
 
-    playerX -= curve * player.speed * 0.015f;
+    playerX -= curve * player.speed * 0.03f;
 
     // GRAMA
     player.onGrass = CheckPlayerOnGrass();

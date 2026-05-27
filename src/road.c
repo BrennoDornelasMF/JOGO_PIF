@@ -8,6 +8,7 @@ float trackValue[TRACK_LENGTH];
 float track[100];
 float turnValue = 0;
 
+
 static const char* trackData = "===l===r===LR===RR==R=L=L=L======RR=RLR===";
 int trackDataLen = 0;
 

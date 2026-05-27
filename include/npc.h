@@ -4,7 +4,7 @@
 #include "raylib.h"
 #include <stdbool.h>
 
-#define MAX_NPCS 10
+#define MAX_NPCS 5
 #define NPC_SPRITE_COUNT 2
 
 typedef struct {

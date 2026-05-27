@@ -27,8 +27,8 @@ void DrawHUD(void) {
     DrawText(TextFormat("SCORE: %d", gameState.score), 10, 10, 24, WHITE);
 
     // Vidas como [v] já que fonte padrão não suporta ♥
-    for (int i = 0; i < gameState.lives; i++)
-        DrawText("[v]", 10 + i * 45, 40, 24, RED);
+    for (int i = 0; i <= gameState.lives; i++)
+        DrawText("[v]", 20 + i * 50, 40, 24, RED);
 
     if (gameState.gameOver)
         DrawText("GAME OVER", SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT / 2, 48, RED);
