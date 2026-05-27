@@ -99,23 +99,24 @@ void UpdatePlayer(void) {
     
     
     roadPosition += player.speed * 0.01f;
+    roadPosition  = fmod(roadPosition, trackDataLen);
 
-    // if(roadPosition > 10){
-    //     roadPosition = 0;
-    // }
-
-    roadPosition = fmod(roadPosition, trackDataLen);
     float curve = readTrack(roadPosition);
+
+    playerX -= curve * player.speed * 0.015f;
 
     // GRAMA
     player.onGrass = CheckPlayerOnGrass();
 
     if(player.onGrass){
         player.speed *= 0.97f;
-        playerX *= 0.97f;
+        playerX      *= 0.97f;
     }
 
-    // playerX += curve * player.speed * 0.005f;
+    // Empurra o Carro para fora nas curvas
+    // float curvePush = curve * player.speed * 0.015f;
+    // playerX -= curvePush;
+    
  
     // =========================
     // LIMITE DA PISTA
