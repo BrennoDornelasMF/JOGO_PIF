@@ -3,11 +3,13 @@
 
 #include <stdbool.h>
 
+
 typedef struct {
     int   lives;
     int   score;
     float scoreTimer;   // acumula tempo para dar pontos
     bool  gameOver;
+    bool playerFinished;
 } GameState;
 
 extern GameState gameState;

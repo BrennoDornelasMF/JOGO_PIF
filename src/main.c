@@ -18,7 +18,7 @@ int main() {
     InitPlayer();
     InitSprites();
     InitGame();
-    InitNPCs();
+    InitNPCs(roadPosition);
 
     while (!WindowShouldClose()) {
         // Update

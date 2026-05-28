@@ -13,10 +13,10 @@ void CheckCollisions(float playerRoadPos) {
         if (!npcs[i].active) continue;
 
         float dz = fabsf(npcs[i].roadPos - playerRoadPos);
-        float dx = fabsf(npcs[i].laneX   - playerX);
+        float dx = fabsf(npcs[i].laneX - playerX);
 
         // Ajuste esses valores conforme o tamanho dos sprites
-        if (dz < 2.0f && dx < 120.0f) {
+        if (dz < 0.5f && dx < 200.0f) {
             // BATEU!
             gameState.lives--;
             player.hitTimer = HIT_COOLDOWN;

@@ -1,111 +1,119 @@
-    #include "npc.h"
-    #include "raylib.h"
-    #include "road.h"
-    #include <stdlib.h>
-    #include <math.h>
+#include "npc.h"
+#include "raylib.h"
+#include "road.h"
+#include <stdlib.h>
+#include <math.h>
 
-    // Deve bater com o main.c
-    #define SCREEN_WIDTH  1280
-    #define SCREEN_HEIGHT 720
+NPC       npcs[MAX_NPCS];
+Texture2D npcSprites[NPC_SPRITE_COUNT];
 
-    NPC npcs[MAX_NPCS];
-    Texture2D npcSprites[NPC_SPRITE_COUNT];
+/* -----------------------------------------------------------------
+   IMPORTANTE: track[] no seu road.c já armazena screenX em pixels
+   Raylib (0..1280), NÃO em espaço microStudio.
 
-    static float lanes[] = { -0.6f, -0.3f, 0.0f, 0.3f, 0.6f };
-    #define LANE_COUNT 5
+   Por isso DrawNPCs NÃO faz conversão de espaço — usa track[]
+   diretamente como X base e calcula Y via a mesma fórmula do DrawRoad.
+----------------------------------------------------------------- */
 
-    void InitNPCs(void) {
-        npcSprites[0] = LoadTexture("assets/sprites/npc_green.png");
-        npcSprites[1] = LoadTexture("assets/sprites/npc_black.png");
+void InitNPCs(float playerRoadPos) {
+    npcSprites[0] = LoadTexture("assets/sprites/npc_green.png");
+    npcSprites[1] = LoadTexture("assets/sprites/npc_black.png");
 
-        for (int i = 0; i < MAX_NPCS; i++) {
-            npcs[i].active    = true;
-            npcs[i].roadPos   = roadPosition + 1.0f + (float)(i * 0.8);
-            npcs[i].laneX     = lanes[i % LANE_COUNT];
-            npcs[i].speed     = 0.008f;
-            npcs[i].spriteIdx = i % NPC_SPRITE_COUNT;
-        }
+    /* laneX: desvio lateral em pixels na linha de base (i=5, perto da tela)
+       Valores positivos = direita, negativos = esquerda.
+       A escala diminui com a distância, então o efeito visual fica correto. */
+    float startX[] = { -120.0f, 120.0f, -60.0f, 60.0f, 0.0f };
+
+    for (int i = 0; i < MAX_NPCS; i++) {
+        npcs[i].active    = true;
+        npcs[i].finished  = false;
+        /* espaça os NPCs à frente do jogador (igual ao exemplo: i * 0.1) */
+        npcs[i].roadPos   = playerRoadPos + 0.5f + (float)i * 0.4f;
+        npcs[i].laneX     = startX[i];
+        npcs[i].speed     = 30.0f + (float)(i * 5);
+        npcs[i].spriteIdx = i % NPC_SPRITE_COUNT;
     }
+}
 
-    void UpdateNPCs(float playerRoadPos, float playerSpeed) {
-        for (int i = 0; i < MAX_NPCS; i++) {
-            if (!npcs[i].active) continue;
-
-            npcs[i].roadPos += playerSpeed * 0.006f;
-            // npcs[i].roadPos += npcs[i].speed;
-
-            float diff = npcs[i].roadPos - playerRoadPos;
-
-#ifdef DEBUG_HITBOX
-        // Imprime no terminal para ver o que acontece
-        if (i == 0)
-            TraceLog(LOG_INFO, "NPC0: roadPos=%.3f playerPos=%.3f diff=%.3f speed=%.4f",
-                     npcs[i].roadPos, playerRoadPos, diff, npcs[i].speed);
-#endif
-
-            if (diff < 0.3f || diff > 8.0f) {
-                npcs[i].roadPos   = playerRoadPos + 1.5f + (float)(rand() % 6);
-                npcs[i].laneX     = lanes[rand() % LANE_COUNT];
-                npcs[i].spriteIdx = rand() % NPC_SPRITE_COUNT;
-            }
-        }
+void UpdateNPCs(float playerRoadPos, float playerSpeed) {
+    (void)playerRoadPos;
+    (void)playerSpeed;
+    float dt = GetFrameTime();
+    for (int i = 0; i < MAX_NPCS; i++) {
+        if (!npcs[i].active || npcs[i].finished) continue;
+        /* idêntico ao exemplo: c.position += c.speed * dt / 50 */
+        npcs[i].roadPos += npcs[i].speed * dt / 50.0f;
+        if (npcs[i].roadPos >= (float)trackDataLen)
+            npcs[i].roadPos -= (float)trackDataLen;
     }
+}
 
 void DrawNPCs(float playerRoadPos, float camX) {
-    int horizon = SCREEN_HEIGHT / 2 + 35;
+    (void)camX;
+
+    int   sh     = SCREEN_HEIGHT;
+    int   sw     = SCREEN_WIDTH;
+    int   horizon = sh / 2 + 35;   /* igual ao DrawRoad */
 
     for (int i = 0; i < MAX_NPCS; i++) {
         if (!npcs[i].active) continue;
 
-        float diff = npcs[i].roadPos - playerRoadPos;
-        if (diff <= 0.0f) continue;  // atrás do player, não desenha
+        /* distância na pista */
+        float d = npcs[i].roadPos - playerRoadPos;
+        if (d < -((float)trackDataLen / 2.0f)) d += (float)trackDataLen;
+        if (d <= 0.0f) continue;
 
-        // diff pequeno = perto = lineF grande (base da tela)
-        // diff grande  = longe = lineF pequeno (horizonte)
-        // diff esperado: 0.3 a 14.0
-        float lineF = 100.0f - (diff / 8.0f) * 90.0f;
+        /* linha de tela [0..100] equivalente a essa distância */
+        float line = distanceToLine(d);
 
-        if (lineF < 6.0f || lineF > 99.0f) continue;
+        /* só desenha na faixa visível — começa em 5 igual ao DrawRoad */
+        if (line < 5.0f || line > 99.0f) continue;
 
-        float screenY = SCREEN_HEIGHT - lineF * (SCREEN_HEIGHT - horizon) / 100.0f;
-        if (screenY < horizon) continue;
+        /* scale no espaço microStudio (igual ao exemplo: 1000 / d*120) */
+        float scale_ms = 1000.0f / (d * 120.0f);
 
-        int   line       = (int)lineF;
-        float roadCenter = track[line];
-        float dist       = lineToDistance(lineF);
-        float width      = (SCREEN_WIDTH * 0.06f) / dist;
+        /* interpolação em track[] — já em pixels Raylib */
+        int   h = (int)line;
+        float a = line - (float)h;
+        if (h < 5)  h = 5;   /* track[0..4] não são preenchidos */
+        if (h > 98) h = 98;
+        float px = track[h] * (1.0f - a) + track[h + 1] * a;
+        /* px == screenX da linha central da pista nessa profundidade */
 
-        float screenX = roadCenter + npcs[i].laneX * width;
+        /* desvio lateral: scale_ms diminui com a distância → perspectiva correta
+           o fator 0.012 vem do exemplo; aqui multiplicamos por sw/400 para
+           converter do espaço lógico microStudio (±200) para pixels Raylib */
+        float laneOffset = npcs[i].laneX * scale_ms * 0.012f * (sw / 400.0f);
+        float screenX    = px + laneOffset;
 
-        // escala: perto = grande, longe = pequeno
-        float scale = (lineF / 100.0f) * 2.0f;
-        if (scale < 0.05f) continue;
+        /* Y: mesma fórmula do DrawRoad
+             screenY = sh - line * (sh - horizon) / 100 */
+        float screenY = (float)sh - line * (float)(sh - horizon) / 100.0f;
 
+        /* tamanho do sprite — scale_ms está em espaço microStudio (tela 200px),
+           converte para pixels Raylib com sh/200 */
+        float scalePx = scale_ms * ((float)sh / 200.0f);
         Texture2D tex = npcSprites[npcs[i].spriteIdx];
-        float w = tex.width  * scale;
-        float h = tex.height * scale;
 
+        #define NPC_SCALE 0.7f //quanto maior o numero maior os npcs 
+        float w  = (float)tex.width  * (scalePx / 80.0f) * NPC_SCALE; 
+        float h2 = (float)tex.height * (scalePx / 80.0f) * NPC_SCALE;
+
+        if (w < 4.0f) continue;
+
+        /* ancora o sprite na base (rodas no chão) */
         DrawTexturePro(
             tex,
-            (Rectangle){ 0, 0, tex.width, tex.height },
-            (Rectangle){ screenX, screenY, w, h },
-            (Vector2){ w / 2, h },
+            (Rectangle){ 0, 0, (float)tex.width, (float)tex.height },
+            (Rectangle){ screenX - w / 2.0f, screenY - h2, w, h2 },
+            (Vector2){ 0, 0 },
             0.0f,
             WHITE
         );
-
-#ifdef DEBUG_HITBOX
-        DrawRectangleLinesEx(
-            (Rectangle){ screenX - w/2, screenY - h, w, h },
-            2, GREEN
-        );
-        DrawText(TextFormat("NPC%d diff:%.2f line:%.1f", i, diff, lineF),
-                 900, 10 + i * 20, 16, YELLOW);
-#endif
     }
 }
 
-    void UnloadNPCs(void) {
-        for (int i = 0; i < NPC_SPRITE_COUNT; i++)
-            UnloadTexture(npcSprites[i]);
-    }
+void UnloadNPCs(void) {
+    for (int i = 0; i < NPC_SPRITE_COUNT; i++)
+        UnloadTexture(npcSprites[i]);
+}
