@@ -61,9 +61,9 @@ void InitSprites(void) {
 
     /* distribui aleatoriamente — ~30% de chance em cada slot */
     for (int i = 0; i < OBJECTS_PER_SIDE; i++) {
-        if (GetRandomValue(0, 99) < 30)
+        if (GetRandomValue(0, 99) < 12)
             leftObjects[i].typeIdx  = idxTree;
-        if (GetRandomValue(0, 99) < 30)
+        if (GetRandomValue(0, 99) < 12)
             rightObjects[i].typeIdx = idxTree;
     }
 }
@@ -89,13 +89,11 @@ void DrawSprites(void) {
         float d    = lineToDistance(line);   /* distância na pista */
 
         /* posição absoluta na pista */
-        float roadD = roadPosition + d;
+        int segmento = (int)floorf(roadPosition * 10.0f) + i;
 
-        /* índice no array de objetos laterais */
-        int objIdx = (int)(roadD * 10.0f);
-        /* garante wrap-around positivo */
-        objIdx = ((objIdx % OBJECTS_PER_SIDE) + OBJECTS_PER_SIDE) % OBJECTS_PER_SIDE;
-
+        //calculo do warap-around
+        int objIdx = ((segmento % OBJECTS_PER_SIDE) + OBJECTS_PER_SIDE) % OBJECTS_PER_SIDE;
+       
         /* interpolação em track[] para o X central da pista */
         int   h = i < 5 ? 5 : (i > 98 ? 98 : i);
         float px = track[h];   /* screenX em pixels Raylib */
