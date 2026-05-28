@@ -4,7 +4,7 @@
 #include "raylib.h"
 #include <stdbool.h>
 
-#define MAX_NPCS 5
+#define MAX_NPCS 10
 #define NPC_SPRITE_COUNT 2
 
 typedef struct {
@@ -14,6 +14,7 @@ typedef struct {
     int   spriteIdx; // 0 = verde, 1 = preto
     bool  active;
     bool finished;
+    Rectangle screenBox;
 } NPC;
 
 extern NPC npcs[MAX_NPCS];

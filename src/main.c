@@ -28,18 +28,19 @@ int main() {
         UpdateGameCamera();
         UpdateGame(player.speed);
         UpdateNPCs(roadPosition, player.speed);
-        CheckCollisions(roadPosition);
-
+        
         // Draw
         BeginDrawing();
-            ClearBackground(BLACK);
-            DrawClouds();
-            DrawRoad();
-            DrawSprites();
-            DrawNPCs(roadPosition, playerX);  // NPCs ANTES do player
-            DrawPlayer();                      // player por cima
-            DrawHUD();
+        ClearBackground(BLACK);
+        DrawClouds();
+        DrawRoad();
+        DrawSprites();
+        DrawNPCs(roadPosition, playerX);  // NPCs ANTES do player
+        DrawPlayer();                      // player por cima
+        DrawHUD();
         EndDrawing();
+        
+        CheckCollisions(roadPosition);
     }
 
     UnloadSprites();

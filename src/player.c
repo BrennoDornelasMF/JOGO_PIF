@@ -26,6 +26,20 @@ void InitPlayer(void) {
 
 }
 
+Rectangle GetPlayerScreenBox(void) {
+    float scale  = 2.0f;
+    float width  = player.sprites[CAR_STRAIGT].width  * scale;
+    float height = player.sprites[CAR_STRAIGT].height * scale;
+    float screenX = SCREEN_WIDTH  / 2 + playerX * 0.5f;
+    float screenY = SCREEN_HEIGHT - height / 2 + 20;
+    return (Rectangle){
+        screenX - width  / 2,
+        screenY - height,
+        width,
+        height
+    };
+}
+/*
 Rectangle GetPlayerHitbox(){
     return (Rectangle){
         playerX - player.hitboxWidth / 2,
@@ -33,7 +47,7 @@ Rectangle GetPlayerHitbox(){
         player.hitboxWidth,
         player.hitboxHeight
     };
-}
+}*/
 
 bool CheckPlayerOnGrass(){
     return (playerX < -500.0f || playerX > 500.0f);
@@ -52,7 +66,7 @@ void UpdatePlayer(void) {
 
     if (IsKeyDown(KEY_UP)) {
 
-        player.speed += 0.05f;
+        player.speed += 0.03f;
     }
 
     // =========================
@@ -83,8 +97,8 @@ void UpdatePlayer(void) {
     if (player.speed < 0)
         player.speed = 0;
 
-    if (player.speed > 3)
-        player.speed = 3;
+    if (player.speed > 2.5f)
+        player.speed = 2.5f;
 
     // =========================
     // DIREÇÃO
@@ -118,7 +132,7 @@ void UpdatePlayer(void) {
 
     float curve = readTrack(roadPosition);
 
-    playerX -= curve * player.speed * 0.03f;
+    playerX -= curve * player.speed * 0.015f;
 
     // GRAMA
     player.onGrass = CheckPlayerOnGrass();

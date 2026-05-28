@@ -35,6 +35,7 @@ void UpdatePlayer(void);
 void DrawPlayer(void);
 void UnloadPlayer(void);
 
+Rectangle GetPlayerScreenBox(void);
 Rectangle GetPlayerHitbox();
 bool CheckPlayerOnGrass();
 

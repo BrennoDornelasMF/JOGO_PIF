@@ -33,6 +33,8 @@ void UpdateNPCs(float playerRoadPos, float playerSpeed) {
     (void)playerSpeed;
     float dt = GetFrameTime();
     for (int i = 0; i < MAX_NPCS; i++) {
+        npcs[i].screenBox = (Rectangle){ 0, 0, 0, 0 };
+
         if (!npcs[i].active || npcs[i].finished) continue;
         /* idêntico ao exemplo: c.position += c.speed * dt / 50 */
         npcs[i].roadPos += npcs[i].speed * dt / 50.0f;
@@ -92,6 +94,14 @@ void DrawNPCs(float playerRoadPos, float camX) {
         float w  = (float)tex.width  * (scalePx / 80.0f) * NPC_SCALE; 
         float h2 = (float)tex.height * (scalePx / 80.0f) * NPC_SCALE;
 
+        // pega a posição da hitbox
+        npcs[i].screenBox = (Rectangle){
+                screenX - w / 2.0f,
+                screenY - h2,
+                w,
+                h2
+        } ;
+
         if (w < 4.0f) continue;
 
         /* ancora o sprite na base (rodas no chão) */
@@ -103,6 +113,22 @@ void DrawNPCs(float playerRoadPos, float camX) {
             0.0f,
             WHITE
         );
+
+        #ifdef DEBUG_HITBOX
+        DrawRectangleLinesEx(
+            (Rectangle){
+                screenX - w / 2.0f,
+                screenY - h2,
+                w,
+                h2
+            },
+            2,
+            GREEN
+        );
+        DrawText(TextFormat("d:%.2f l:%.1f", d, line),
+                 screenX - w / 2.0f, screenY - h2 - 16, 14, RED);
+        #endif
+
     }
 }
 
