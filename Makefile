@@ -4,7 +4,7 @@ SRC = src/*.c
 
 OUT = game
 
-CFLAGS = -Iinclude 
+CFLAGS = -Iinclude -DDEBUG_HITBOX
 
 
 LIBS = -lraylib -lm -ldl -lpthread -lGL -lrt -lX11
