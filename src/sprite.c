@@ -55,7 +55,6 @@ void InitSprites(void) {
 
     int idxBush  = AddSpriteType("assets/sprites/bush.png",  0.8f, 0.1f);
     int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f);
-    int idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f,0.0f);
     idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f, 0.0f);
     printf("idxTunnelWall: %d w:%d h:%d\n", 
        idxTunnelWall, 
@@ -140,8 +139,8 @@ void DrawSprites(void) {
 
         /* --- lado esquerdo --- */
         int leftIdx = isTunnel ? idxTunnelWall:leftObjects[objIdx].typeIdx;
-        if (leftObjects[objIdx].typeIdx >= 0) {
-            SpriteType *sp = &spriteTypes[leftObjects[objIdx].typeIdx];
+        if (leftIdx >= 0) {
+            SpriteType *sp = &spriteTypes[leftIdx];
             float w  = (float)sp->tex.width  * (scalePx / 80.0f) * sp->sizeScale;
             float h2 = (float)sp->tex.height * (scalePx / 80.0f) * sp->sizeScale;
             if (w >= 4.0f) {
@@ -159,8 +158,8 @@ void DrawSprites(void) {
 
         /* --- lado direito --- */
         int rightIdx = isTunnel ? idxTunnelWall : rightObjects[objIdx].typeIdx;
-        if (rightObjects[objIdx].typeIdx >= 0) {
-            SpriteType *sp = &spriteTypes[rightObjects[objIdx].typeIdx];
+        if (rightIdx >= 0) {
+            SpriteType *sp = &spriteTypes[rightIdx];
             float w  = (float)sp->tex.width  * (scalePx / 80.0f) * sp->sizeScale;
             float h2 = (float)sp->tex.height * (scalePx / 80.0f) * sp->sizeScale;
             if (w >= 4.0f) {
