@@ -109,7 +109,8 @@ void DrawRoad(void) {
         float tt   = 0;
 
         int horizon = SCREEN_HEIGHT / 2+35;  // linha do horizonte
-        DrawRectangle(0, horizon, SCREEN_WIDTH, SCREEN_HEIGHT - horizon, DARKGREEN);
+        DrawRectangle(0, horizon, SCREEN_WIDTH, SCREEN_HEIGHT - horizon,
+         currentBiome == BIOME_TUNNEL ? (Color){30,30,35,255} : DARKGREEN);
 
         for (int i = 5; i < 100; i++) {
             
@@ -130,8 +131,15 @@ void DrawRoad(void) {
 
             // cores alternadas
             int seg = (int)(d * 10);
-            Color grassColor = (seg % 10 < 5) ? DARKGREEN : GREEN;
-            Color roadColor  = (seg % 10 < 5) ? DARKGRAY  : GRAY;
+            Color grassColor, roadColor;
+            if(currentBiome == BIOME_TUNEL){
+                //no tunel concreto mais escuro nas laterais e alfasto mais escuro     
+                grassColor = (Color){ 50, 50, 55, 255 };
+                roadColor  = (Color){ 40, 40, 45, 255 };
+            }else{
+                grassColor = (seg % 10 < 5) ? DARKGREEN : GREEN;
+                roadColor  = (seg % 10 < 5) ? DARKGRAY  : GRAY;
+            }
 
             float lineH = (SCREEN_HEIGHT - horizon) / 100.0f;
 
@@ -152,5 +160,6 @@ void DrawRoad(void) {
             track[i] = screenX;
             if (i == 0) turnValue = t;
         }
-        DrawRectangle(0, horizon, SCREEN_WIDTH, 3, GREEN);
+        DrawRectangle(0, horizon, SCREEN_WIDTH, 3,
+        currentBiome == BIOME_TUNNEL ? (Color){50,50,55,255} : GREEN);
     }   
