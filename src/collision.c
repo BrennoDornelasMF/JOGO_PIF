@@ -25,24 +25,5 @@ void CheckCollisions(float playerRoadPos) {
             break;
         }
     }
-    /* colisão com paredes do túnel */
-    if (currentBiome == BIOME_TUNNEL) {
-    /* largura da pista na posição do player (linha i=5, mais próxima) */
-        float roadHalfWidth = (SCREEN_WIDTH * 0.06f) / lineToDistance(5.0f);
-        float roadCenter    = track[5];
-        float leftWall      = roadCenter - roadHalfWidth;
-        float rightWall     = roadCenter + roadHalfWidth;
-
-        /* limita o playerX para não ultrapassar as paredes */
-        if (playerBox.x < leftWall) {
-        extern float playerX;
-        playerX = -(roadHalfWidth * 0.8f);
-        player.speed *= 0.95f;
-        }
-        if (playerBox.x + playerBox.width > rightWall) {
-        extern float playerX;
-        playerX = roadHalfWidth * 0.8f;
-        player.speed *= 0.95f;
-        }
-}
+   
 }

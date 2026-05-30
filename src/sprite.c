@@ -194,7 +194,7 @@ void DrawSprites(void) {
         }
     }
     printf("istunel: %d currentbiome: %d\n", isTunnel, currentBiome);
-    if (isTunnel  idxTunnelEntrance >= 0) {
+    if (idxTunnelEntrance >= 0) {
         float tunnelStart = 60.0f;
         float d = tunnelStart - roadPosition;  /* distância até a entrada */
 
