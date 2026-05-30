@@ -42,6 +42,15 @@ int main() {
         DrawNPCs(roadPosition, playerX);  // NPCs ANTES do player
         DrawPlayer();                      // player por cima
         DrawHUD();
+        //efeito de vinheta do tunel
+        if(currentBiome == BIOME_TUNEL){
+            //escurece as bordas da tela simulando o tunel
+            unsigned char alpha =(unsigned char)(biomeTransition * 180);
+            DrawRectangleGradientH(0,0,SCREEN_WIDTH/3,SCREEN_HEIGHT,
+            (Color){0,0,0,alpha}, (Color){0,0,0,0});
+            DrawRectangleGradientH(SCREEN_WIDTH*2/3,0,SCREEN_WIDTH/3,SCREEN_HEIGHT,
+            (Color){0,0,0,0}, (Color){0,0,0, alpha});
+        }
         EndDrawing();
 
         CheckCollisions(roadPosition);
