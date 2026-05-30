@@ -36,7 +36,7 @@ void InitClouds(void) {
     int sml = AddCloudTex("assets/sprites/cloud_sml.png");
 
     bgTexture = LoadTexture("assets/sprites/background.png");
-    bgTunnel  = LoadTexture("assets/sprites/tunnel_mountain.png");
+    bgTunnel  = LoadTexture("assets/sprites/mountain_bg.png");
 
     int horizon = SCREEN_HEIGHT / 2 + 35;
     int types[] = { big, med, sml, big, med, sml, big, med,
@@ -106,8 +106,8 @@ void DrawClouds(void) {
         if (alpha < 0.0f) alpha = 0.0f;
         if (alpha > 1.0f) alpha = 1.0f;
 
-        int bgH = 200;                  /* altura da montanha na tela */
-        int bgY = horizon - bgH;        /* ancora no horizonte         */
+        int bgH = 280;                  /* altura da montanha na tela */
+        int bgY = horizon - bgH + 30;        /* ancora no horizonte         */
 
         Color tint = WHITE;
         tint.a = (unsigned char)(alpha * 255);
@@ -130,6 +130,15 @@ void DrawClouds(void) {
         int tileW = bgTexture.width;
         int tilesN = (SCREEN_WIDTH / tileW) + 2;
 
+        float ruralAlpha = 1.0f;
+        if(roadPosition > 45.0f)
+            ruralAlpha = 1.0f - (roadPosition - 45.0f) /10.0f;
+        if(ruralAlpha < 0.0f) ruralAlpha = 0.0f;
+
+        Color tileTint = WHITE;
+        tileTint.a=(unsigned char)(ruralAlpha * 255);
+
+
         for (int t = -1; t < tilesN; t++) {
             float tx = (float)(t * tileW) + bgOffset;
             DrawTexturePro(
@@ -137,7 +146,7 @@ void DrawClouds(void) {
                 (Rectangle){ 0, 0, (float)tileW, (float)bgTexture.height },
                 (Rectangle){ tx, (float)bgY, (float)tileW, (float)bgH },
                 (Vector2){ 0, 0 },
-                0.0f, WHITE
+                0.0f, tileTint
             );
         }
 
