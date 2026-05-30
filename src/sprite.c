@@ -58,7 +58,7 @@ void InitSprites(void) {
     int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f);
     idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 0.8f, 0.0f);
     idxTunnelLamp = AddSpriteType("assets/sprites/tunnel_lamp.png", 0.5f, 0.0f);
-    idxTunnelEntrance = AddSpriteType("assets/sprites/tunnel_entrance.png", 3.0f, 0.0f);
+    idxTunnelEntrance = AddSpriteType("assets/sprites/tunnel_mountain.png", 4.0f, 0.0f);
     printf("idxTunnelWall: %d w:%d h:%d\n", 
        idxTunnelWall, 
        spriteTypes[idxTunnelWall].tex.width,
@@ -194,7 +194,7 @@ void DrawSprites(void) {
         }
     }
     printf("istunel: %d currentbiome: %d\n", isTunnel, currentBiome);
-    if (isTunnel && idxTunnelEntrance >= 0) {
+    if (isTunnel  idxTunnelEntrance >= 0) {
         float tunnelStart = 60.0f;
         float d = tunnelStart - roadPosition;  /* distância até a entrada */
 
