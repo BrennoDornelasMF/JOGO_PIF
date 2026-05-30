@@ -2,6 +2,7 @@
 #include "road.h"
 #include "raylib.h"
 #include <math.h>
+#include <stdio.h>
 
 /* -----------------------------------------------------------------
    Sistema de objetos laterais — mesma lógica do drawSideObjects()
@@ -20,7 +21,8 @@ typedef struct {
 } SpriteType;
 
 static SpriteType spriteTypes[MAX_SPRITE_TYPES];
-static int        spriteTypeCount = 0;
+static int spriteTypeCount = 0;
+static int idxTunnelWall = -1;        
 
 /* --- objetos fixos em cada lado da pista ----------------------- */
 typedef struct {
@@ -52,7 +54,8 @@ void InitSprites(void) {
     int idxPalm  = AddSpriteType("assets/sprites/palm_tree.png", 1.8f, 0.4f); */
 
     int idxBush  = AddSpriteType("assets/sprites/bush.png",  0.8f, 0.1f);
-    int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f); 
+    int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f);
+    int idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f,0.0f); 
        
     /* inicializa tudo vazio */
     for (int i = 0; i < OBJECTS_PER_SIDE; i++) {
@@ -81,6 +84,9 @@ void InitSprites(void) {
         if(GetRandomValue(0,99) < 10)
             rightObjects[i].typeIdx=idxBush;
     }
+
+    printf("idxtunelwall: %d\n",idxTunnelWall);
+    printf("spritetypecount: %d\n", spriteTypeCount);
 }
 
 /* -----------------------------------------------------------------
@@ -97,6 +103,9 @@ void DrawSprites(void) {
     int   sh     = SCREEN_HEIGHT;
     int   sw     = SCREEN_WIDTH;
     int   horizon = sh / 2 + 35;
+    
+    //no tunel desenha as paredes
+    int isTunnel = (currentBiome == BIOME_TUNEL);
 
     /* de trás para frente: line pequeno = longe, line grande = perto */
     for (int i = 98; i >= 5; i--) {
@@ -125,6 +134,7 @@ void DrawSprites(void) {
         float scalePx = scale_ms * ((float)sh / 200.0f);
 
         /* --- lado esquerdo --- */
+        int leftIdx = isTunnel ? idxTunnelWall:leftObjects[objIdx].typeIdx;
         if (leftObjects[objIdx].typeIdx >= 0) {
             SpriteType *sp = &spriteTypes[leftObjects[objIdx].typeIdx];
             float w  = (float)sp->tex.width  * (scalePx / 80.0f) * sp->sizeScale;
@@ -143,6 +153,7 @@ void DrawSprites(void) {
         }
 
         /* --- lado direito --- */
+        int rightIdx = isTunnel ? idxTunnelWall : rightObjects[objIdx].typeIdx;
         if (rightObjects[objIdx].typeIdx >= 0) {
             SpriteType *sp = &spriteTypes[rightObjects[objIdx].typeIdx];
             float w  = (float)sp->tex.width  * (scalePx / 80.0f) * sp->sizeScale;
@@ -159,6 +170,7 @@ void DrawSprites(void) {
             }
         }
     }
+    printf("istunel: %d currentbiome: %d\n", isTunnel, currentBiome);
 }
 
 /* -----------------------------------------------------------------

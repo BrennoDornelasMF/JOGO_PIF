@@ -97,6 +97,9 @@ void UpdateBiome(void){
         biomeTransition += dt * 0.5f; //2 seg ate completar
     if(biomeTransition > 1.0f)
         biomeTransition = 1.0f;
+
+    printf("roadPos: %.2f biome: %d transition: %.2f\n",
+    roadPosition,currentBiome,biomeTransition);
 }
 
 
