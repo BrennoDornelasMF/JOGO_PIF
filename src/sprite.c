@@ -52,10 +52,14 @@ static int AddSpriteType(const char *path, float sizeScale, float offset) {
 void InitSprites(void) {
     /* registra os tipos disponíveis */
     int idxTree = AddSpriteType("assets/sprites/tree.png", 2.0f, 0.3f);
-    
-    //int idxPalm  = AddSpriteType("assets/sprites/palm_tree.png", 1.8f, 0.4f); 
     int idxBush  = AddSpriteType("assets/sprites/bush.png",  0.8f, 0.1f);
     int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f);
+    int idxBirchTree = AddSpriteType("assets/sprites/Birch1.png" 2.0f,0.3f);
+    int idxMaple = AddSpriteType("assets\sprites\Maple7.png", 2.0f, 0.3f);
+    int idxBanco =AddSpriteType("assets\sprites\banquinho.png", 0.8f,0.0f);
+    int idxArbusto = AddSpriteType("assets\sprites\arbusto.png", 0.8f, 0.0f);
+    int idxCogumelo = AddSpriteType("assets\sprites\cogumelo.png", 0.5f, 0.0f);
+    int idxTronco = AddSpriteType("assets\sprites\tronco.png", 0.5f,0.0f);
     idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 0.8f, 0.0f);
     idxTunnelLamp = AddSpriteType("assets/sprites/tunnel_lamp.png", 0.5f, 0.0f);
     idxTunnelEntrance = AddSpriteType("assets/sprites/tunnel_mountain.png", 4.0f, 0.0f);
@@ -92,6 +96,54 @@ void InitSprites(void) {
             rightObjects[i].typeIdx=idxBush;
     }
 
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 10)
+            leftObjects[i].typeIdx=idxBirchTree;
+        if(GetRandomValue(0,99) < 10)
+            rightObjects[i].typeIdx=idxBirchTree;
+    }
+
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 8)
+            leftObjects[i].typeIdx=idxMaple;
+        if(GetRandomValue(0,99) < 8)
+            rightObjects[i].typeIdx=idxMaple;
+    }
+
+
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 1)
+            leftObjects[i].typeIdx=idxBanco;
+        if(GetRandomValue(0,99) < 1)
+            rightObjects[i].typeIdx=idxBanco;
+    }
+
+
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 6)
+            leftObjects[i].typeIdx=idxArbusto;
+        if(GetRandomValue(0,99) < 6)
+            rightObjects[i].typeIdx=idxArbusto;
+    }
+
+
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 6)
+            leftObjects[i].typeIdx=idxCogumelo;
+        if(GetRandomValue(0,99) < 6)
+            rightObjects[i].typeIdx=idxCogumelo;
+    }
+    
+
+
+    for(int i=0; i<OBJECTS_PER_SIDE;i++){
+        if(GetRandomValue(0,99) < 6)
+            leftObjects[i].typeIdx=idxTronco;
+        if(GetRandomValue(0,99) < 6)
+            rightObjects[i].typeIdx=idxTronco;
+    }
+    
+    
     printf("idxtunelwall: %d\n",idxTunnelWall);
     printf("spritetypecount: %d\n", spriteTypeCount);
 }
