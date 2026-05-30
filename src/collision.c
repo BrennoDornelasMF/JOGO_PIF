@@ -10,7 +10,7 @@ void CheckCollisions(float playerRoadPos) {
     (void)playerRoadPos;
     if (player.hitTimer > 0) return;
 
-    Rectangle playerBox = GetPlayerScreenBox();
+    Rectangle playerBox = GetPlayerScreenBox(0, SCREEN_WIDTH);
 
     for (NPCNode* node = npcList; node != NULL; node = node->next) {
         if (!node->data.active) continue;

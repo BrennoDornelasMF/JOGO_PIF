@@ -4,25 +4,27 @@
 #include <stdio.h>
 #include "player.h"
 
-#define SCREEN_WIDTH  1280
-#define SCREEN_HEIGHT 720
-#define MAX_SPEED_KMH 270.f // velocidade maxima em kmh
-#define NEEDLE_START -135.f // angulo de comeco do ponteiro
-#define NEEDLE_SWEEP 260.f // angulo de movimento do ponteiro do inicio ao fim 
+#define SCREEN_WIDTH   1280
+#define SCREEN_HEIGHT  720
+#define MAX_SPEED_KMH  270.f
+#define NEEDLE_START  -135.f
+#define NEEDLE_SWEEP   260.f
 
-static float needleAngle = -220.f; // guarda o angulo atual do ponteiro começando em zero e atualizando depois
-static Texture2D speedoBg; //declaracao da textura
-static Texture2D speedoNeedle; //declaracao da textura
-
-
+static float     needleAngle = -220.f;
+static Texture2D speedoBg;
+static Texture2D speedoNeedle;
 
 GameState gameState;
+GameMode  gameMode = MODE_SINGLE; // padrão; o menu vai alterar
 
-static void LoadHighscores() {
+// ======================================================
+// Highscores
+// ======================================================
+
+static void LoadHighscores(void) {
     gameState.scoreCount = 0;
     FILE* f = fopen(SCORE_FILE, "r");
     if (!f) return;
-
     while (gameState.scoreCount < MAX_SCORES) {
         ScoreEntry* e = &gameState.highscores[gameState.scoreCount];
         if (fscanf(f, "%31s %d", e->name, &e->score) != 2) break;
@@ -31,19 +33,17 @@ static void LoadHighscores() {
     fclose(f);
 }
 
-static void SaveHighscores(){
+static void SaveHighscores(void) {
     FILE* f = fopen(SCORE_FILE, "w");
-    if(!f) return;
-    for(int i =0; i < gameState.scoreCount; i++)
-        fprintf(f, "%s %d\n",
-                gameState.highscores[i].name,
-                gameState.highscores[i].score);
+    if (!f) return;
+    for (int i = 0; i < gameState.scoreCount; i++)
+        fprintf(f, "%s %d\n", gameState.highscores[i].name,
+                              gameState.highscores[i].score);
     fclose(f);
 }
 
-static void TryInsertScore(const char* name, int score){
+static void TryInsertScore(const char* name, int score) {
     int count = gameState.scoreCount;
-
     if (count >= MAX_SCORES && score <= gameState.highscores[MAX_SCORES-1].score)
         return;
 
@@ -61,13 +61,12 @@ static void TryInsertScore(const char* name, int score){
     gameState.highscores[pos].score    = score;
 
     if (gameState.scoreCount < MAX_SCORES) gameState.scoreCount++;
-
     SaveHighscores();
 }
 
 static void DrawHighscores(void) {
-    DrawRectangle(SCREEN_WIDTH/2 - 220, SCREEN_HEIGHT/2 - 260, 440, 520,
-                  Fade(BLACK, 0.88f));
+    DrawRectangle(SCREEN_WIDTH/2 - 220, SCREEN_HEIGHT/2 - 260,
+                  440, 520, Fade(BLACK, 0.88f));
     DrawText("TOP 10", SCREEN_WIDTH/2 - 55, SCREEN_HEIGHT/2 - 240, 32, YELLOW);
 
     if (gameState.scoreCount == 0) {
@@ -88,11 +87,13 @@ static void DrawHighscores(void) {
                  SCREEN_HEIGHT/2 - 190 + i * 40,
                  22, c);
     }
-
     DrawText("ENTER para reiniciar  ESC para sair",
              SCREEN_WIDTH/2 - 190, SCREEN_HEIGHT/2 + 230, 18, GRAY);
 }
 
+// ======================================================
+// Init / Update
+// ======================================================
 
 void InitGame(void) {
     gameState.lives         = 3;
@@ -103,9 +104,8 @@ void InitGame(void) {
     gameState.scoreSaved    = false;
     gameState.nameLen       = 0;
     gameState.playerName[0] = '\0';
-    speedoBg = LoadTexture("assets/sprites/speedo_bg.png"); //inicia o velocimetro
-    speedoNeedle = LoadTexture("assets/sprites/speedo_needle.png"); // inicia o ponteiro
-
+    speedoBg     = LoadTexture("assets/sprites/speedo_bg.png");
+    speedoNeedle = LoadTexture("assets/sprites/speedo_needle.png");
     LoadHighscores();
 }
 
@@ -132,70 +132,74 @@ void UpdateGame(float playerSpeed) {
                 gameState.enteringName = false;
             }
         }
-        return;  // mantém o return — reinício é tratado no main.c
+        return;
     }
 
     gameState.scoreTimer += GetFrameTime();
+
     float fraction = (playerSpeed * 100.0f) / MAX_SPEED_KMH;
-    if (fraction < 0.0f) fraction=0.0f;
+    if (fraction < 0.0f) fraction = 0.0f;
     if (fraction > 1.0f) fraction = 1.0f;
+
     float targetAngle = NEEDLE_START + fraction * NEEDLE_SWEEP;
-    needleAngle += (targetAngle - needleAngle) *0.12f; // lerp para o ponteiro se mover suavemente ao inves de teleportar 
+    needleAngle += (targetAngle - needleAngle) * 0.12f;
+
     if (gameState.scoreTimer >= 1.0f) {
         gameState.scoreTimer = 0.0f;
         gameState.score += (int)(playerSpeed * 10);
     }
 }
 
-static void DrawSpeedo(void){
-    //posicao central do velocimetro canto inferior direito da tela, ou seja, defino onde eu quero o velocimetro na tela 
-    float cx = SCREEN_WIDTH - 90.0f; //mover para esquerda diminui o cx ou para direita aumenta o cx
-    float cy = SCREEN_HEIGHT - 90.0f; // mover para cima diminui o cy ou para baixo aumenta o cy
+// ======================================================
+// HUD — parametrizado por viewport
+// id      = índice do jogador (0 ou 1)
+// viewW   = largura da viewport
+// offsetX = início horizontal da viewport na tela
+// ======================================================
 
-    //desenha o velocimetro centralizado em cx e cy
-    //tamanho 140x140
-    // 
+static void DrawSpeedo(int id, int viewW, int offsetX) {
+    float cx = offsetX + viewW - 90.0f;
+    float cy = SCREEN_HEIGHT - 90.0f;
+
     DrawTexturePro(
         speedoBg,
-        (Rectangle){0, 0, (float)speedoBg.width, (float)speedoBg.height}, //sprite inteiro
-        (Rectangle){cx - 70, cy - 70 ,  140 , 140}, // é definido 70 pois é o centro da posicao que eu defini no cx/cy. como o drawtexture pro nao aceita "centro" é preciso metade do tamanho do sprite pra centralizar-lo
-        (Vector2){0,0}, //sem pivo extra, ja centralizei manualmente o sprite
-        0.0f, //sem rotacao no fundo
-        WHITE
+        (Rectangle){0, 0, (float)speedoBg.width, (float)speedoBg.height},
+        (Rectangle){cx - 70, cy - 70, 140, 140},
+        (Vector2){0, 0}, 0.0f, WHITE
     );
-
-
-    //desenho do ponteiro
     DrawTexturePro(
         speedoNeedle,
-        (Rectangle){0, 0, (float)speedoNeedle.width, (float)speedoNeedle.height}, 
-        (Rectangle){cx, cy,  140 , 140}, // não é definido manualmente pois o programa entenderia que deslocaria sempre que andasse então não giraria no centro do velocimetro
-        (Vector2){70,70}, //necessario pivo pois o ponteiro se movimenta
-        needleAngle, //angulo atual atualizado em UpdateGame
-        WHITE
+        (Rectangle){0, 0, (float)speedoNeedle.width, (float)speedoNeedle.height},
+        (Rectangle){cx, cy, 140, 140},
+        (Vector2){70, 70}, needleAngle, WHITE
     );
 
-    int kmh = (int)(player.speed * 100.0f); // velocidade maxima do velocimetro, formula (270(velomaxima) / player(speed = 2.70)) = 100, assim consigo sincronizar a velocidade do player com o velocimetro
-    DrawText(TextFormat("%d", kmh), cx -15, cy +30, 18, WHITE);
-
-
+    int kmh = (int)(players[id].speed * 100.0f);
+    DrawText(TextFormat("%d", kmh), cx - 15, cy + 30, 18, WHITE);
 }
 
+void DrawHUD(int id, int viewW, int offsetX) {
+    DrawSpeedo(id, viewW, offsetX);
 
-
-
-
-void DrawHUD(void) {
-    DrawSpeedo();
-    DrawText(TextFormat("SCORE: %d", gameState.score), 20, 10, 24, WHITE);
+    DrawText(TextFormat("SCORE: %d", gameState.score),
+             offsetX + 20, 10, 24, WHITE);
 
     for (int i = 0; i < gameState.lives; i++)
-        DrawText("[v]", 20 + i * 50, 40, 24, RED);
+        DrawText("[v]", offsetX + 20 + i * 50, 40, 24, RED);
+
+    // Label do jogador no coop
+    if (gameMode == MODE_COOP) {
+        const char* label = (id == 0) ? "P1" : "P2";
+        DrawText(label, offsetX + viewW / 2 - 12, 8, 22,
+                 id == 0 ? WHITE : SKYBLUE);
+    }
 
     if (!gameState.gameOver) return;
 
+    // Game Over só no P1 (tela central)
+    if (id != 0) return;
+
     if (gameState.enteringName) {
-        // Tela de entrada de nome
         DrawRectangle(SCREEN_WIDTH/2 - 240, SCREEN_HEIGHT/2 - 100,
                       480, 200, Fade(BLACK, 0.90f));
         DrawText("GAME OVER",
