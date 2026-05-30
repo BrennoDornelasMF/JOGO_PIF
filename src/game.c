@@ -2,9 +2,19 @@
 #include "raylib.h"
 #include <string.h>
 #include <stdio.h>
+#include "player.h"
 
 #define SCREEN_WIDTH  1280
 #define SCREEN_HEIGHT 720
+#define MAX_SPEED_KMH 270.f // velocidade maxima em kmh
+#define NEEDLE_START -135.f // angulo de comeco do ponteiro
+#define NEEDLE_SWEEP 260.f // angulo de movimento do ponteiro do inicio ao fim 
+
+static float needleAngle = -220.f; // guarda o angulo atual do ponteiro começando em zero e atualizando depois
+static Texture2D speedoBg; //declaracao da textura
+static Texture2D speedoNeedle; //declaracao da textura
+
+
 
 GameState gameState;
 
@@ -93,6 +103,8 @@ void InitGame(void) {
     gameState.scoreSaved    = false;
     gameState.nameLen       = 0;
     gameState.playerName[0] = '\0';
+    speedoBg = LoadTexture("assets/sprites/speedo_bg.png"); //inicia o velocimetro
+    speedoNeedle = LoadTexture("assets/sprites/speedo_needle.png"); // inicia o ponteiro
 
     LoadHighscores();
 }
@@ -124,13 +136,57 @@ void UpdateGame(float playerSpeed) {
     }
 
     gameState.scoreTimer += GetFrameTime();
+    float fraction = (playerSpeed * 100.0f) / MAX_SPEED_KMH;
+    if (fraction < 0.0f) fraction=0.0f;
+    if (fraction > 1.0f) fraction = 1.0f;
+    float targetAngle = NEEDLE_START + fraction * NEEDLE_SWEEP;
+    needleAngle += (targetAngle - needleAngle) *0.12f; // lerp para o ponteiro se mover suavemente ao inves de teleportar 
     if (gameState.scoreTimer >= 1.0f) {
         gameState.scoreTimer = 0.0f;
         gameState.score += (int)(playerSpeed * 10);
     }
 }
 
+static void DrawSpeedo(void){
+    //posicao central do velocimetro canto inferior direito da tela, ou seja, defino onde eu quero o velocimetro na tela 
+    float cx = SCREEN_WIDTH - 90.0f; //mover para esquerda diminui o cx ou para direita aumenta o cx
+    float cy = SCREEN_HEIGHT - 90.0f; // mover para cima diminui o cy ou para baixo aumenta o cy
+
+    //desenha o velocimetro centralizado em cx e cy
+    //tamanho 140x140
+    // 
+    DrawTexturePro(
+        speedoBg,
+        (Rectangle){0, 0, (float)speedoBg.width, (float)speedoBg.height}, //sprite inteiro
+        (Rectangle){cx - 70, cy - 70 ,  140 , 140}, // é definido 70 pois é o centro da posicao que eu defini no cx/cy. como o drawtexture pro nao aceita "centro" é preciso metade do tamanho do sprite pra centralizar-lo
+        (Vector2){0,0}, //sem pivo extra, ja centralizei manualmente o sprite
+        0.0f, //sem rotacao no fundo
+        WHITE
+    );
+
+
+    //desenho do ponteiro
+    DrawTexturePro(
+        speedoNeedle,
+        (Rectangle){0, 0, (float)speedoNeedle.width, (float)speedoNeedle.height}, 
+        (Rectangle){cx, cy,  140 , 140}, // não é definido manualmente pois o programa entenderia que deslocaria sempre que andasse então não giraria no centro do velocimetro
+        (Vector2){70,70}, //necessario pivo pois o ponteiro se movimenta
+        needleAngle, //angulo atual atualizado em UpdateGame
+        WHITE
+    );
+
+    int kmh = (int)(player.speed * 100.0f); // velocidade maxima do velocimetro, formula (270(velomaxima) / player(speed = 2.70)) = 100, assim consigo sincronizar a velocidade do player com o velocimetro
+    DrawText(TextFormat("%d", kmh), cx -15, cy +30, 18, WHITE);
+
+
+}
+
+
+
+
+
 void DrawHUD(void) {
+    DrawSpeedo();
     DrawText(TextFormat("SCORE: %d", gameState.score), 20, 10, 24, WHITE);
 
     for (int i = 0; i < gameState.lives; i++)
