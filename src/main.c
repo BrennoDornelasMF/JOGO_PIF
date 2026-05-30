@@ -28,6 +28,7 @@ int main() {
         // Update
         UpdatePlayer();
         UpdateGameCamera();
+        UpdateBiome();
         UpdateGame(player.speed);
         UpdateNPCs(roadPosition, player.speed);
         UpdateAudio();

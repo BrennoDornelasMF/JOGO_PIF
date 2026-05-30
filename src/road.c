@@ -1,12 +1,15 @@
 #include "road.h"
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
 extern float playerX;
 
 float roadPosition = 0;
 float trackValue[TRACK_LENGTH];
 float track[100];
 float turnValue = 0;
+int currentBiome = BIOME_RURAL; //bioma inicial
+float biomeTransition = 0.0f; //comeca sem transicao em andamento
 
 
 static const char* trackData = 
@@ -53,7 +56,7 @@ float readTrack(float x) {
 
 void InitRoad(void) {
     trackDataLen = strlen(trackData);
-
+    printf("trackdatalen: %d\n", trackDataLen);
     for (int i = 0; i < trackDataLen; i++) {
         switch (trackData[i]) {
             case 'l': trackValue[i] = -150; break;
@@ -65,7 +68,39 @@ void InitRoad(void) {
     }
 }
 
-    void DrawRoad(void) {
+void UpdateBiome(void){
+    float dt = GetFrameTime(); //tempo em segundos que passo dedsdo o ultimo frame, usado apra as animacoes independertem do fps
+
+
+    //definicao do bioma alvo com base na pos atual da pista
+    /*
+    baseado no datatrack len
+    0-60: rural
+    61-120: tunel
+    121-181: cidade
+    */
+
+
+    int targetBiome;
+    if(roadPosition < 60.0f) targetBiome = BIOME_RURAL;
+    else if(roadPosition < 120.0f) targetBiome = BIOME_TUNEL;
+    else targetBiome = BIOME_CITY;
+
+    //se mudar de bioma reinicia a transicao
+    if(targetBiome != currentBiome){
+        currentBiome = targetBiome;
+        biomeTransition = 0.0f;
+    }
+
+    //avanca a transicao suavemente ate 1.0
+    if(biomeTransition < 1.0f)
+        biomeTransition += dt * 0.5f; //2 seg ate completar
+    if(biomeTransition > 1.0f)
+        biomeTransition = 1.0f;
+}
+
+
+void DrawRoad(void) {
         float off  = 0;
         float off2 = -playerX;
         float tt   = 0;
