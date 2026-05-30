@@ -55,7 +55,12 @@ void InitSprites(void) {
 
     int idxBush  = AddSpriteType("assets/sprites/bush.png",  0.8f, 0.1f);
     int idxRock  = AddSpriteType("assets/sprites/rock_sml.png",  0.6f, 0.0f);
-    int idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f,0.0f); 
+    int idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f,0.0f);
+    idxTunnelWall = AddSpriteType("assets/sprites/tunnel_wall.png", 1.5f, 0.0f);
+    printf("idxTunnelWall: %d w:%d h:%d\n", 
+       idxTunnelWall, 
+       spriteTypes[idxTunnelWall].tex.width,
+       spriteTypes[idxTunnelWall].tex.height); 
        
     /* inicializa tudo vazio */
     for (int i = 0; i < OBJECTS_PER_SIDE; i++) {
