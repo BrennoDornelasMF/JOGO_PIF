@@ -1,5 +1,6 @@
 #include "player.h"
 #include "road.h"
+#include "audio.h"
 #include <math.h>
 
 extern float turnValue;
@@ -73,8 +74,9 @@ void UpdatePlayer(void) {
     // FREIO
     // =========================
 
-    if (IsKeyDown(KEY_DOWN)) {
+    bool isBraking = IsKeyDown(KEY_DOWN);
 
+    if (isBraking) {
         player.speed -= 0.015f;
     }
     
@@ -159,6 +161,9 @@ void UpdatePlayer(void) {
         playerX = 600;
 
     player.x = playerX;
+
+    // Som do motor
+    UpdateCarSounds(player.speed, 2.7f, isBraking);
 
 }
 

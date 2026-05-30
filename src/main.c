@@ -23,6 +23,7 @@ int main() {
     InitGame();
     InitNPCs(roadPosition);
     InitAudio_Game();
+    InitCarSounds();
 
     while (!WindowShouldClose()) {
         // Update
