@@ -77,45 +77,68 @@ void DrawClouds(void) {
     int horizon = SCREEN_HEIGHT / 2 + 35;
 
     /* 1 — gradiente do céu */
-    DrawRectangleGradientV(0, 0, SCREEN_WIDTH, horizon,
-        (Color){155, 220, 255, 255},   /* azul claro no topo   */
-        (Color){ 80, 170, 230, 255}    /* azul vivo no horizonte */
-    );
+    
+    //cores do ceu rural
+    Color skyTop = (Color){155,220,255,255};
+    Color skyBottom = (Color){80,170,230,255};
 
-    /* 2 — faixa de background tileada no horizonte
-           ocupa os últimos 48px antes do horizonte */
-    int bgH    = 64;
-    int bgY    = horizon - bgH;
-    int tileW  = bgTexture.width;   /* 64px */
-    int tilesN = (SCREEN_WIDTH / tileW) + 2;
-
-    for (int t = -1; t < tilesN; t++) {
-        float tx = (float)(t * tileW) + bgOffset;
-        DrawTexturePro(
-            bgTexture,
-            (Rectangle){ 0, 0, (float)tileW, (float)bgTexture.height },
-            (Rectangle){ tx, (float)bgY, (float)tileW, (float)bgH },
-            (Vector2){ 0, 0 },
-            0.0f, WHITE
-        );
+    //tunel escurece gradualmente
+    if(currentBiome == BIOME_TUNEL){
+        //interpola de azul para o preto conforme o biome|Transition
+        skyTop.r = (unsigned char)(155*(1.0f - biomeTransition));
+        skyTop.g = (unsigned char)(220*(1.0f - biomeTransition));
+        skyTop.b = (unsigned char)(255*(1.0f - biomeTransition));
+        skyBottom.r = (unsigned char)(80*(1.0f - biomeTransition));
+        skyBottom.g = (unsigned char)(170*(1.0f - biomeTransition));
+        skyBottom.b = (unsigned char)(230*(1.0f - biomeTransition));
     }
 
-    /* 3 — nuvens por cima do background */
-    for (int i = 0; i < MAX_CLOUDS; i++) {
-        Texture2D tex = cloudTextures[clouds[i].typeIdx].tex;
-        float w  = (float)tex.width  * clouds[i].scale;
-        float h2 = (float)tex.height * clouds[i].scale;
+    //na cidade ceu noturno roxo escuro
+    if(currentBiome == BIOME_CITY){
+        skyTop = (Color){10,10,30,255};
+        skyBottom = (Color){30,10,60,255};
+    }
 
-        Color tint = WHITE;
-        tint.a = (unsigned char)(clouds[i].alpha * 255);
+    DrawRectangleGradientV(0,0,SCREEN_WIDTH, horizon, skyTop, skyBottom);
 
-        DrawTexturePro(
-            tex,
-            (Rectangle){ 0, 0, (float)tex.width, (float)tex.height },
-            (Rectangle){ clouds[i].x - w / 2.0f, clouds[i].y - h2 / 2.0f, w, h2 },
-            (Vector2){ 0, 0 },
-            0.0f, tint
-        );
+    if (currentBiome != BIOME_TUNEL){
+        
+    
+        /* 2 — faixa de background tileada no horizonte
+            ocupa os últimos 48px antes do horizonte */
+        int bgH    = 64;
+        int bgY    = horizon - bgH;
+        int tileW  = bgTexture.width;   /* 64px */
+        int tilesN = (SCREEN_WIDTH / tileW) + 2;
+
+        for (int t = -1; t < tilesN; t++) {
+            float tx = (float)(t * tileW) + bgOffset;
+            DrawTexturePro(
+                bgTexture,
+                (Rectangle){ 0, 0, (float)tileW, (float)bgTexture.height },
+                (Rectangle){ tx, (float)bgY, (float)tileW, (float)bgH },
+                (Vector2){ 0, 0 },
+                0.0f, WHITE
+            );
+        }
+
+        /* 3 — nuvens por cima do background */
+        for (int i = 0; i < MAX_CLOUDS; i++) {
+            Texture2D tex = cloudTextures[clouds[i].typeIdx].tex;
+            float w  = (float)tex.width  * clouds[i].scale;
+            float h2 = (float)tex.height * clouds[i].scale;
+
+            Color tint = WHITE;
+            tint.a = (unsigned char)(clouds[i].alpha * 255);
+
+            DrawTexturePro(
+                tex,
+                (Rectangle){ 0, 0, (float)tex.width, (float)tex.height },
+                (Rectangle){ clouds[i].x - w / 2.0f, clouds[i].y - h2 / 2.0f, w, h2 },
+                (Vector2){ 0, 0 },
+                0.0f, tint
+            );
+        }
     }
 }
 
